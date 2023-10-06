@@ -7,9 +7,11 @@ const userRouter = express.Router();
 userRouter.get("/user", async (req, res) => {
   try {
     let all_user = await User.find();
+    if (!all_user || all_user.length === 0) return res.status(400).send("No employees type was found!")
+
     res.status(200).json(all_user);
   } catch (error) {
-    res.status(500).json({ error: "Internal Server Error" });
+    res.status(500).send(`Internal Server Error${error.message}` );
   }
 });
 
@@ -20,41 +22,40 @@ userRouter.post("/user", async (req, res) => {
   try {
     let user = new User(payload);
     await user.save();
-    res.status(201).json({ msg: "Employee Posted Succssfully" });
+    res.status(200).json({ msg: "Employee Posted Succssfully" });
   } catch (error) {
-    res.status(500).json({ error: "Internal Server Error" });
-    console.log(error);
+    res.status(500).send(`Internal Server Error${error.message}` );
   }
 });
 
 //update user data
-userRouter.patch("/user/:id", async (req, res) => {
+userRouter.patch("/user", async (req, res) => {
   let payload = req.body;
-  let id = req.params.id;
+  let id = req.body.id;
   //   console.log(payload, id);
   try {
     let updateUser = await User.findByIdAndUpdate({ "_id": id }, payload);
     if (!updateUser) {
-      return res.status(404).json({ error: "User not found" });
+      return res.status(400).json({ error: "User not found" });
     }
     res.status(200).json({ msg: "Employee Update successfully" });
   } catch (error) {
-    res.status(500).json({ error: "Internal Server Error" });
+    res.status(500).send(`Internal Server Error${error.message}` );
   }
 });
 
 //delete the user
-userRouter.delete("/user/:id", async (req, res) => {
-  let id = req.params.id;
+userRouter.delete("/user", async (req, res) => {
+  let id = req.body.id;
 
   try {
     let deleteUser = await User.findByIdAndUpdate({ "_id": id });
     if (!deleteUser) {
-      return res.status(404).json({ error: "User not found" });
+      return res.status(400).json({ error: "User not found" });
     }
     res.status(200).json({ msg: "Employee Delete successfully" });
   } catch (error) {
-    res.status(500).json({ error: "Internal Server Error" });
+    res.status(500).send(`Internal Server Error${error.message}` );
   }
 });
 

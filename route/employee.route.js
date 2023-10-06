@@ -7,57 +7,56 @@ const employeeRouter = express.Router();
 employeeRouter.get("/employee", async (req, res) => {
   try {
     const allEmployees = await EmployeeModel.find();
+    if (!allEmployees || allEmployees.length === 0) return res.status(400).send("No employees type was found!")
     res.status(200).json(allEmployees);
-  } catch (error) {
-    console.error("Error getting employees:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+  } catch (error) { 
+    res.status(500).send(`Internal Server Error${error.message}` );
   }
 });
 
 // Create an employee
 employeeRouter.post("/employee", async (req, res) => {
   const payload = req.body;
-
   try {
     const employee = new EmployeeModel(payload);
     await employee.save();
-    res.status(201).json({ msg: "Employee Posted Successfully" });
+    res.status(200).json({ msg: "Employee Posted Successfully" });
   } catch (error) {
-    console.error("Error creating employee:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+   
+    res.status(500).send(`Internal Server Error${error.message}` );
   }
 });
 
 // Update employee data
-employeeRouter.patch("/employee/:id", async (req, res) => {
+employeeRouter.patch("/employee/", async (req, res) => {
   const payload = req.body;
-  const id = req.params.id;
+  const id = req.body.id;
 
   try {
     const updatedEmployee = await EmployeeModel.findByIdAndUpdate(id, payload);
     if (!updatedEmployee) {
-      return res.status(404).json({ error: "Employee not found" });
+      return res.status(400).json({ error: "Employee not found" });
     }
     res.status(200).json({ msg: "Employee Update successfully" });
   } catch (error) {
-    console.error("Error updating employee:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    
+    res.status(500).send(`Internal Server Error${error.message}` );
   }
 });
 
 // Delete an employee
-employeeRouter.delete("/employee/:id", async (req, res) => {
-  const id = req.params.id;
+employeeRouter.delete("/employee", async (req, res) => {
+  const id = req.body.id;
 
   try {
     const deletedEmployee = await EmployeeModel.findByIdAndRemove(id);
     if (!deletedEmployee) {
-      return res.status(404).json({ error: "Employee not found" });
+      return res.status(400).json({ error: "Employee not found" });
     }
     res.status(200).json({ msg: "Employee Delete successfully" });
   } catch (error) {
-    console.error("Error deleting employee:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    
+    res.status(500).send(`Internal Server Error${error.message}` );
   }
 });
 
